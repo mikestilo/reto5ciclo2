@@ -1,0 +1,423 @@
+// Importaciones necesarias en iMaster
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.PreparedStatement;
+import java.util.ArrayList;
+import java.io.File;
+
+// Util (No modificar)
+class JDBCUtilities {
+    private static final String DATABASE_LOCATION = "ProyectosConstruccion.db";
+
+    public static Connection getConnection() throws SQLException {
+        String url = "jdbc:sqlite:"+DATABASE_LOCATION;
+
+        return DriverManager.getConnection(url);
+    }
+}
+
+// Remplace en adelante por las clases de sus archivos .java
+
+// Vista
+public class VistaRequerimientosReto4 {
+    
+    public static final ControladorRequerimientosReto4 controlador = new ControladorRequerimientosReto4();
+
+    public static void requerimiento1(){
+
+        System.out.println("*** Proyectos por Estrato ***");
+    
+        try{
+
+            ArrayList<ProyectosPorEstrato> rankingProyectosPorEstratos = controlador.consultarProyectosPorEstrato();
+
+            //cada vo cargado
+            for (ProyectosPorEstrato proyectosPorEstrato : rankingProyectosPorEstratos) {
+                System.out.printf("El proyecto de ID_Tipo %d de codigo: %d de area Maxima %d, tiene un estrato %d %n",
+                    proyectosPorEstrato.getIdTipo(),
+                    proyectosPorEstrato.getCodigoTipo(),
+                    proyectosPorEstrato.getAreaMaxima(),
+                    proyectosPorEstrato.getEstrato()
+                );
+            }
+
+        }catch(SQLException e){
+            System.err.println("Ha ocurrido un error!"+e.getMessage());
+        }
+    }
+
+    public static void requerimiento2(){ 
+        
+        System.out.println("*** Proyectos por Tipo ***");
+
+        try{
+
+             ArrayList<ProyectosPorTipo> rankingProyectosPorTipo = controlador.consultarProyectosPorTipo();
+
+            //cada vo cargado
+            for (ProyectosPorTipo proyectosPorTipo : rankingProyectosPorTipo) {
+                System.out.printf("El proyecto de ID_Proyecto %d de la constructora: %s de la ciudad %s, tiene un estrato asignado de %d %n",
+                    proyectosPorTipo.getIdProyecto(),
+                    proyectosPorTipo.getConstructora(),
+                    proyectosPorTipo.getCiudad(),
+                    proyectosPorTipo.getEstrato()
+                );
+            }   
+
+        }catch(SQLException e){
+            System.err.println("Ha ocurrido un error!"+e.getMessage());
+        }
+    }
+
+    public static void requerimiento3(){
+
+        System.out.println("*** Proyectos de Tipo Apartaestudio en Quibdo ***");
+
+        try{
+
+            ArrayList<ProyectosQuibdoApartaestudio> rankingProyectosQuibdoApartaestudio = controlador.consultarProyectosQuibdoApartaestudio();
+
+            //cada vo cargado
+            for (ProyectosQuibdoApartaestudio proyectosQuibdoApartaestudio : rankingProyectosQuibdoApartaestudio) {
+                System.out.printf("El proyecto de ID_Proyecto %d de la constructora: %s tiene un porcentaje de cuota inicial de %1.1f, y %s tiene acabados %n",
+                proyectosQuibdoApartaestudio.getIdProyecto(),
+                proyectosQuibdoApartaestudio.getConstructora(),
+                proyectosQuibdoApartaestudio.getPorcentajeCuotaInicial(),
+                proyectosQuibdoApartaestudio.getAcabados()
+                );
+            }
+                
+        
+        }catch(SQLException e){
+            System.err.println("Ha ocurrido un error!"+e.getMessage());
+        }
+    }
+
+}
+
+// Controlador
+public class ControladorRequerimientosReto4 {       
+    
+    private final ProyectosPorEstratoDao proyectosPorEstratoDao;
+    private final ProyectosPorTipoDao proyectosPorTipoDao;
+    private final ProyectosQuibdoApartaestudioDao proyectosQuibdoApartaestudioDao;
+    
+    public ControladorRequerimientosReto4(){
+        this.proyectosQuibdoApartaestudioDao = new ProyectosQuibdoApartaestudioDao();
+        this.proyectosPorTipoDao = new ProyectosPorTipoDao();
+        this.proyectosPorEstratoDao = new ProyectosPorEstratoDao();
+
+    }
+
+    public ArrayList<ProyectosQuibdoApartaestudio> consultarProyectosQuibdoApartaestudio() throws SQLException {
+        return this.proyectosQuibdoApartaestudioDao.rankinQuibdoApartaestudios();
+    }
+    
+    public ArrayList<ProyectosPorTipo> consultarProyectosPorTipo() throws SQLException {
+        return this.proyectosPorTipoDao.rankingProyectosPorTipo();
+    }
+
+    public ArrayList<ProyectosPorEstrato> consultarProyectosPorEstrato() throws SQLException {
+        return this.proyectosPorEstratoDao.rankingProyectosPorEstrato();
+    }
+
+}
+
+// Modelo
+// VO
+public class ProyectosPorEstrato {
+    private Integer idTipo;
+    private Integer codigoTipo;
+    private Integer areaMaxima;
+    private Integer estrato;
+
+    public ProyectosPorEstrato() {
+    }
+
+    public ProyectosPorEstrato(Integer idTipo, Integer codigoTipo, Integer areaMaxima, Integer estrato) {
+        this.idTipo = idTipo;
+        this.codigoTipo = codigoTipo;
+        this.areaMaxima = areaMaxima;
+        this.estrato = estrato;
+    }
+
+    
+    public Integer getIdTipo() {
+        return idTipo;
+    }
+
+    public void setIdTipo(Integer idTipo) {
+        this.idTipo = idTipo;
+    }
+
+    public Integer getCodigoTipo() {
+        return codigoTipo;
+    }
+
+    public void setCodigoTipo(Integer codigoTipo) {
+        this.codigoTipo = codigoTipo;
+    }
+
+    public Integer getAreaMaxima() {
+        return areaMaxima;
+    }
+
+    public void setAreaMaxima(Integer areaMaxima) {
+        this.areaMaxima = areaMaxima;
+    }
+
+    public Integer getEstrato() {
+        return estrato;
+    }
+
+    public void setEstrato(Integer estrato) {
+        this.estrato = estrato;
+    }
+    
+}
+
+public class ProyectosPorTipo {
+    private Integer idProyecto;
+    private String constructora;
+    private String ciudad;
+    private Integer estrato;
+
+    public ProyectosPorTipo() {
+    }
+
+    public ProyectosPorTipo(Integer idProyecto, String constructora, String ciudad, Integer estrato) {
+        this.idProyecto = idProyecto;
+        this.constructora = constructora;
+        this.ciudad = ciudad;
+        this.estrato = estrato;
+    }
+
+    
+    public Integer getIdProyecto() {
+        return idProyecto;
+    }
+
+    public void setIdProyecto(Integer idProyecto) {
+        this.idProyecto = idProyecto;
+    }
+
+    public String getConstructora() {
+        return constructora;
+    }
+
+    public void setConstructora(String constructora) {
+        this.constructora = constructora;
+    }
+
+    public String getCiudad() {
+        return ciudad;
+    }
+
+    public void setCiudad(String ciudad) {
+        this.ciudad = ciudad;
+    }
+
+    public Integer getEstrato() {
+        return estrato;
+    }
+
+    public void setEstrato(Integer estrato) {
+        this.estrato = estrato;
+    }
+    
+}
+
+public class ProyectosQuibdoApartaestudio {
+    private Integer idProyecto;
+    private String constructora;
+    private Double porcentajeCuotaInicial;
+    private String acabados;
+
+    public ProyectosQuibdoApartaestudio() {
+    }
+
+    public ProyectosQuibdoApartaestudio(Integer idProyecto, String constructora, Double porcentajeCuotaInicial, String acabados) {
+        this.idProyecto = idProyecto;
+        this.constructora = constructora;
+        this.porcentajeCuotaInicial = porcentajeCuotaInicial;
+        this.acabados = acabados;
+    }
+
+    
+    public Integer getIdProyecto() {
+        return idProyecto;
+    }
+
+    public void setIdProyecto(Integer idProyecto) {
+        this.idProyecto = idProyecto;
+    }
+
+    public String getConstructora() {
+        return constructora;
+    }
+
+    public void setConstructora(String constructora) {
+        this.constructora = constructora;
+    }
+
+    public Double getPorcentajeCuotaInicial() {
+        return porcentajeCuotaInicial;
+    }
+
+    public void setPorcentajeCuotaInicial(Double porcentajeCuotaInicial) {
+        this.porcentajeCuotaInicial = porcentajeCuotaInicial;
+    }
+
+    public String getAcabados() {
+        return acabados;
+    }
+
+    public void setAcabados(String acabados) {
+        this.acabados = acabados;
+    }  
+}
+
+// DAO
+public class ProyectosPorEstratoDao {
+    //Obtener los proyectos por Estrato 5 o 6
+    public ArrayList<ProyectosPorEstrato> rankingProyectosPorEstrato() throws SQLException {
+
+        ArrayList<ProyectosPorEstrato> respuesta = new ArrayList<ProyectosPorEstrato>();
+        Connection conexion = JDBCUtilities.getConnection();
+
+        try{       
+
+            String consulta =   "SELECT Id_Tipo, Codigo_Tipo, Area_Max, Estrato "+
+                                "FROM Tipo "+
+                                "WHERE Estrato = 5 OR Estrato = 6 "+
+                                "ORDER BY Estrato ";
+
+
+            PreparedStatement statement = conexion.prepareStatement(consulta);
+            ResultSet resultSet = statement.executeQuery();
+
+            //Recorrer los registros en los VO específicos
+            while(resultSet.next()){
+                ProyectosPorEstrato proyectosPorEstrato = new ProyectosPorEstrato();
+                proyectosPorEstrato.setIdTipo(resultSet.getInt("Id_Tipo"));
+                proyectosPorEstrato.setCodigoTipo(resultSet.getInt("Codigo_Tipo"));
+                proyectosPorEstrato.setAreaMaxima(resultSet.getInt("Area_Max"));
+                proyectosPorEstrato.setEstrato(resultSet.getInt("Estrato"));
+
+                //Se agrega cada registro como un objeto del ArrayList que contiene la consulta
+                respuesta.add(proyectosPorEstrato);
+            }
+
+            resultSet.close();
+            statement.close();
+
+        }catch(SQLException e){
+            System.err.println("Error consultando los proyectos por estrato: "+e);
+        }finally{
+            if(conexion != null){
+                conexion.close();
+            }
+        }
+
+        //Retornar la colección de vo's
+        return respuesta;
+    }  
+}
+
+public class ProyectosPorTipoDao {
+   
+    public ArrayList<ProyectosPorTipo> rankingProyectosPorTipo() throws SQLException {
+        
+        ArrayList<ProyectosPorTipo> respuesta = new ArrayList<ProyectosPorTipo>();
+        Connection conexion = JDBCUtilities.getConnection();
+
+        try{       
+
+            String consulta =   "SELECT ID_Proyecto, Constructora, Ciudad, Estrato "+
+                                "FROM Proyecto "+
+                                "INNER JOIN Tipo "+
+                                "ON Proyecto.ID_Tipo = Tipo.ID_Tipo "+
+                                "WHERE Ciudad = 'Monteria'";
+                                
+
+
+            PreparedStatement statement = conexion.prepareStatement(consulta);
+            ResultSet resultSet = statement.executeQuery();
+
+            //Recorrer los registros en los VO específicos
+            while(resultSet.next()){
+                ProyectosPorTipo proyectosPorTipo = new ProyectosPorTipo();
+                proyectosPorTipo.setIdProyecto(resultSet.getInt("Id_Proyecto"));
+                proyectosPorTipo.setConstructora(resultSet.getString("Constructora"));
+                proyectosPorTipo.setCiudad(resultSet.getString("Ciudad"));
+                proyectosPorTipo.setEstrato(resultSet.getInt("Estrato"));
+
+                //Se agrega cada registro como un objeto del ArrayList que contiene la consulta
+                respuesta.add(proyectosPorTipo);
+            }
+
+            resultSet.close();
+            statement.close();
+
+        }catch(SQLException e){
+            System.err.println("Error consultando los proyectos por estrato: "+e);
+        }finally{
+            if(conexion != null){
+                conexion.close();
+            }
+        }
+
+        //Retornar la colección de vo's
+        return respuesta;
+    }
+        
+}
+
+public class ProyectosQuibdoApartaestudioDao {
+   
+    public ArrayList<ProyectosQuibdoApartaestudio> rankinQuibdoApartaestudios() throws SQLException {
+        
+        ArrayList<ProyectosQuibdoApartaestudio> respuesta = new ArrayList<ProyectosQuibdoApartaestudio>();
+        Connection conexion = JDBCUtilities.getConnection();
+
+        try{       
+
+            String consulta =   "SELECT ID_Proyecto, Constructora, Porcentaje_Cuota_Inicial, Acabados "+
+                                "FROM Proyecto "+
+                                "WHERE Ciudad = 'Quibdo'"+
+                                "AND Clasificacion = 'Apartaestudio'";
+
+
+            PreparedStatement statement = conexion.prepareStatement(consulta);
+            ResultSet resultSet = statement.executeQuery();
+
+            //Recorrer los registros en los VO específicos
+            while(resultSet.next()){
+                ProyectosQuibdoApartaestudio proyectosQuibdoApartaestudio = new ProyectosQuibdoApartaestudio();
+                proyectosQuibdoApartaestudio.setIdProyecto(resultSet.getInt("Id_Proyecto"));
+                proyectosQuibdoApartaestudio.setConstructora(resultSet.getString("Constructora"));
+                proyectosQuibdoApartaestudio.setPorcentajeCuotaInicial(resultSet.getDouble("Porcentaje_Cuota_Inicial"));
+                proyectosQuibdoApartaestudio.setAcabados(resultSet.getString("Acabados"));
+
+                //Se agrega cada registro como un objeto del ArrayList que contiene la consulta
+                respuesta.add(proyectosQuibdoApartaestudio);
+            }
+
+            resultSet.close();
+            statement.close();
+
+        }catch(SQLException e){
+            System.err.println("Error consultando los proyectos por estrato: "+e);
+        }finally{
+            if(conexion != null){
+                conexion.close();
+            }
+        }
+
+        //Retornar la colección de vo's
+        return respuesta;
+    }
+        
+}
